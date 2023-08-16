@@ -1,10 +1,6 @@
 #!/bin/bash
 # More to be considered
 # 1. We read ip address of gateway from route list which may get outdated
-# 2. If the recovered modem is set back as default primary route, it breaks current tcp session.
-#    previously I don't think so, the reason maybe is that the system invalidate current route cache
-#    in adding a new route...so we may still should use downgrade metric algorithm
-
 
 get_gateway() {
     local interface=$1
@@ -68,11 +64,6 @@ do
 
   if $IP_CHECK_PASSED
   then
-    LOW_METRIC_ROUTES=$(get_routes $INTERFACE $LOW_METRIC)
-    if [[ -n $LOW_METRIC_ROUTES ]]
-    then
-      continue
-    fi
     ALL_LOW_METRIC_ROUTES=$(get_routes "" $LOW_METRIC)
     if [[ -n $ALL_LOW_METRIC_ROUTES ]]
     then
