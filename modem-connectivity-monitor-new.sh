@@ -1,8 +1,8 @@
 #!/bin/bash
 # More to be considered
 # 1. We read ip address of gateway from route list which may get outdated
-# 2. If the recovered modem is set back as default primary route, it breaks current tcp session. 
-#    previously I don't think so, the reason maybe is that the system invalidate current route cache 
+# 2. If the recovered modem is set back as default primary route, it breaks current tcp session.
+#    previously I don't think so, the reason maybe is that the system invalidate current route cache
 #    in adding a new route...so we may still should use downgrade metric algorithm
 
 
@@ -37,6 +37,11 @@ check_unexpected_routes() {
   while read line; do
   if [[ ! $line =~ metric ]]; then
     echo "Warning: found unexpected routes: $line"
+    if [[ $line =~ wan ]]; then
+      interface=$(echo $line | awk -F 'dev ' '{print $2}' | awk '{print $1}')
+      delete_route $interface 0
+      echo "delete no metric routes: $line"
+    fi
   elif [[ $line =~ $low_metric || $line =~ $high_metric ]]; then
     :
   else
@@ -65,6 +70,11 @@ do
   then
     LOW_METRIC_ROUTES=$(get_routes $INTERFACE $LOW_METRIC)
     if [[ -n $LOW_METRIC_ROUTES ]]
+    then
+      continue
+    fi
+    ALL_LOW_METRIC_ROUTES=$(get_routes "" $LOW_METRIC)
+    if [[ -n $ALL_LOW_METRIC_ROUTES ]]
     then
       continue
     fi
